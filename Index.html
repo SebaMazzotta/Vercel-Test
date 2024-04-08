@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Button Position</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    #container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    #randomButton {
+      position: absolute;
+      width: 100px;
+      height: 50px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 5px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #randomButton:hover {
+      background-color: #0056b3;
+    }
+
+    #timer,
+    #counter {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      color: #333;
+    }
+
+    #counter {
+      top: 70px;
+    }
+
+    #highScore {
+      position: absolute;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      color: #333;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      animation: confetti-fall 2s linear infinite;
+    }
+
+    .balloon {
+      position: absolute;
+      width: 30px;
+      height: 50px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      animation: balloon-rise 4s linear infinite;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(0) rotateZ(0);
+      }
+      100% {
+        transform: translateY(calc(100vh + 10px)) rotateZ(720deg);
+      }
+    }
+
+    @keyframes balloon-rise {
+      0% {
+        transform: translateY(100vh) scale(1);
+      }
+      100% {
+        transform: translateY(0) scale(1.5);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="container">
+    <button id="randomButton">Move Me</button>
+    <div id="timer"></div>
+    <div id="counter"></div>
+    <div id="highScore"></div>
+    <div id="confettiContainer"></div>
+    <div id="balloonContainer"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const button = document.getElementById("randomButton");
+      const timerDiv = document.getElementById("timer");
+      const counterDiv = document.getElementById("counter");
+      const highScoreDiv = document.getElementById("highScore");
+      const confettiContainer = document.getElementById("confettiContainer");
+      const balloonContainer = document.getElementById("balloonContainer");
+      let timerStarted = false;
+      let clickCount = 0;
+      let countdownTimer;
+      let scores = [];
+      let maxScore = 0;
+
+      function moveRandomly() {
+        const maxX = window.innerWidth - button.offsetWidth;
+        const maxY = window.innerHeight - button.offsetHeight;
+        const newX = Math.floor(Math.random() * maxX);
+        const newY = Math.floor(Math.random() * maxY);
+
+        button.style.left = newX + "px";
+        button.style.top = newY + "px";
+
+        if (!timerStarted) {
+          startTimer();
+          timerStarted = true;
+        }
+      }
+
+      function resetGame() {
+        clearInterval(countdownTimer);
+        timerDiv.textContent = "";
+        counterDiv.textContent = "";
+        highScoreDiv.textContent = "";
+        timerStarted = false;
+        clickCount = 0;
+        clearConfettiAndBalloons();
+      }
+
+      button.addEventListener("click", function () {
+        if (timerDiv.textContent === "Time's up!") {
+          resetGame();
+        } else {
+          moveRandomly();
+          clickCount++;
+        }
+      });
+
+      function startTimer() {
+        let timeLeft = 10;
+        countdownTimer = setInterval(function () {
+          if (timeLeft <= 0) {
+            clearInterval(countdownTimer);
+            timerDiv.textContent = "Time's up!";
+            counterDiv.textContent = "Button clicked " + clickCount + " times.";
+            updateHighScore();
+          } else {
+            timerDiv.textContent = "Timer: " + timeLeft + "s";
+            timeLeft--;
+          }
+        }, 1000);
+      }
+
+      function updateHighScore() {
+        scores.push(clickCount);
+        maxScore = Math.max(...scores);
+        if (clickCount === maxScore) {
+          highScoreDiv.textContent = "Bravissimo! New high score: " + maxScore;
+          showConfetti();
+          showBalloons();
+        } else {
+          highScoreDiv.textContent = "Your score: " + clickCount + ". High score: " + maxScore;
+        }
+      }
+
+      function showConfetti() {
+        const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+        for (let i = 0; i < 50; i++) {
+          const confetti = document.createElement("div");
+          confetti.classList.add("confetti");
+          confetti.style.left = Math.random() * window.innerWidth + "px";
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confettiContainer.appendChild(confetti);
+        }
+      }
+
+      function showBalloons() {
+        const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff"];
+        for (let i = 0; i < 10; i++) {
+          const balloon = document.createElement("div");
+          balloon.classList.add("balloon");
+          balloon.style.left = Math.random() * window.innerWidth + "px";
+          balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          balloonContainer.appendChild(balloon);
+        }
+      }
+
+      function clearConfettiAndBalloons() {
+        confettiContainer.innerHTML = "";
+        balloonContainer.innerHTML = "";
+      }
+    });
+  </script>
+
+</body>
+
+</html>
